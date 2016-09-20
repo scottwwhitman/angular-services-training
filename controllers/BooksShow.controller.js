@@ -5,8 +5,8 @@ angular.module('libraryApp')
   remove $http from the controller
   add BookService as a dependency
 *******************************************/
-BooksShowController.$inject=['$routeParams', '$location', '$http'];
-function BooksShowController($routeParams,    $location,   $http) {
+BooksShowController.$inject=['$routeParams', '$location', '$http', 'BookService'];
+function BooksShowController($routeParams,    $location,   $http,   BookService) {
   var vm = this;
   var bookId = $routeParams.id;
   // exports
@@ -26,19 +26,11 @@ function BooksShowController($routeParams,    $location,   $http) {
       BookService.get(id).then()
     **************************************/
 
-    $http({
-      method: 'GET',
-      url: 'https://super-crud.herokuapp.com/books/'+id
-    }).then(onBookShowSuccess, onError);
+    BookService.get(id).then(function(data){
+      console.log('here\'s the book data in the controller', data);
+      vm.book = data;
+    });
 
-
-    function onBookShowSuccess(response){
-      console.log('here\'s the data for book', id, ':', response.data);
-      vm.book = response.data;
-    }
-    function onError(error){
-      console.log('there was an error: ', error);
-    }
   }
 
 
@@ -60,6 +52,7 @@ function BooksShowController($routeParams,    $location,   $http) {
     }
   }
 
+
   function deleteBook(book) {
       console.log('deleting book: ', book);
 
@@ -68,15 +61,15 @@ function BooksShowController($routeParams,    $location,   $http) {
       make use of the service instead
       BookService.remove(id).then()
     **************************************/
+      BookService.remove(book).then(onBookDeleteSuccess, onError);
 
-      $http({
-        method: 'DELETE',
-        url: 'https://super-crud.herokuapp.com/books/' + book._id,
-      }).then(onBookDeleteSuccess);
-
-      function onBookDeleteSuccess(response){
-        console.log('book delete response data:', response.data);
+      function onBookDeleteSuccess(book){
+        console.log('controller deleted book ', book._id, ':', book);
         $location.path('/');
       }
+      function onError() {
+        console.log("error deleting the book");
+      }
+
     }
 }
